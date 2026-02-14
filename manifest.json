@@ -73,6 +73,7 @@
         "router" : {
             "mode" : "hash",
             "base" : "/webH5/" 
-        }
+        },
+        "publicPath" : "/webH5/"
     }
 }
