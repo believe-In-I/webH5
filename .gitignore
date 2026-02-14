@@ -3,8 +3,9 @@ node_modules/
 package-lock.json
 yarn.lock
 
-# 编译输出目录
-unpackage/dist/
+# 编译输出目录 (保留web构建产物用于部署)
+unpackage/dist/build/
+!unpackage/dist/build/web/
 
 # 编辑器文件
 .hbuilderx/
