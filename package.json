@@ -1,0 +1,20 @@
+{
+  "name": "webh5",
+  "version": "1.0.0",
+  "description": "Uni-App H5 project",
+  "main": "main.js",
+  "scripts": {
+    "dev": "echo 'Development mode not configured. Please use HBuilderX to run the project.'",
+    "build": "echo 'Build command not configured. Please use HBuilderX to build the project.'"
+  },
+  "keywords": [
+    "uni-app",
+    "h5"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "vue": "^3.4.21",
+    "uni-app": "^3.1.0"
+  }
+}

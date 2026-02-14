@@ -10,7 +10,7 @@ permissions:
   contents: write
 
 jobs:
-  deploy:
+  build-and-deploy:
     # 在最新的 Ubuntu 系统上运行
     runs-on: ubuntu-latest
 
@@ -19,7 +19,33 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # 步骤2：复制 .nojekyll 文件到编译输出目录
+      # 步骤2：设置 Node.js 环境
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      # 步骤3：安装依赖
+      - name: Install dependencies
+        run: npm install
+
+      # 步骤4：安装 HBuilderX 命令行工具
+      - name: Install HBuilderX CLI
+        run: |
+          wget -q https://download.dcloud.net.cn/HBuilderX.4.0.3.20240408.zip -O HBuilderX.zip
+          unzip -q HBuilderX.zip -d HBuilderX
+          chmod +x HBuilderX/HBuilderX
+          echo "HBuilderX installed successfully"
+
+      # 步骤5：编译 Uni-App 项目为 H5
+      - name: Build H5 project
+        run: |
+          # 使用 HBuilderX 命令行工具编译项目
+          # 注意：这需要项目中有正确的 manifest.json 配置
+          ./HBuilderX/HBuilderX --headless --compile --project . --platform web
+          echo "Project built successfully"
+
+      # 步骤6：复制 .nojekyll 文件到编译输出目录
       # 这样 .nojekyll 文件就会被部署到 gh-pages 分支，禁用 GitHub Pages 的默认构建
       - name: Copy .nojekyll file
         run: |
@@ -30,9 +56,7 @@ jobs:
             touch unpackage/dist/build/web/.nojekyll
           fi
 
-      # 步骤3：部署到 gh-pages 分支
-      # 注意：此方案要求你每次在本地用 HBuilderX 编译后，将编译产物提交到源码仓库
-      # 你需要修改 .gitignore 文件，移除对 unpackage/dist/build/web 的忽略
+      # 步骤7：部署到 gh-pages 分支
       - name: Deploy to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@v4
         with:
