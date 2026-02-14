@@ -1,7 +1,12 @@
 <template>
 	<view class="content">
 		<view class="text-area">
-			开发ios的H5测试页面
+			<view>开发ios的H5测试页面</view>
+			<view>开发ios的H5测试页面</view>
+			<view>开发ios的H5测试页面</view>
+			<view>开发ios的H5测试页面</view>
+			<view>开发ios的H5测试页面</view>
+			<view>开发ios的H5测试页面</view>
 		</view>
 	</view>
 </template>
