@@ -35,13 +35,21 @@ jobs:
       - name: Install HBuilderX CLI
         run: npm install -g @dcloudio/uni-cli
 
-      # 步骤5：🔴 关键！在云端自动编译
-      - name: Build H5 project
-        run: |
-          echo "开始编译 H5 项目..."
-          npx uni-app build --platform h5
-          echo "编译完成，检查输出目录..."
-          ls -la dist/build/h5 || ls -la unpackage/dist/build/web
+	  # 步骤5：🔴 关键！在云端自动编译
+	  - name: Build H5 project
+	    run: |
+		  echo "开始编译 H5 项目..."
+		  # 尝试几种不同的编译命令
+		  if npx --no-install @dcloudio/uni-cli -v &> /dev/null; then
+		    npx @dcloudio/uni-cli build --platform h5
+		  elif [ -f "package.json" ]; then
+		    npm run build:h5 || npm run build
+		  else
+		    echo "无法确定编译命令，请检查项目配置"
+		    exit 1
+		  fi
+		  echo "编译完成，检查输出目录..."
+		  ls -la dist/build/h5 2>/dev/null || ls -la unpackage/dist/build/web 2>/dev/null || echo "未找到编译输出目录"
 
       # 步骤6：创建 .nojekyll 文件（告诉 GitHub 不要处理 Jekyll）
       - name: Create .nojekyll
