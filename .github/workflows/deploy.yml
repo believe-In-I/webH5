@@ -19,7 +19,18 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # 步骤2：部署到 gh-pages 分支
+      # 步骤2：复制 .nojekyll 文件到编译输出目录
+      # 这样 .nojekyll 文件就会被部署到 gh-pages 分支，禁用 GitHub Pages 的默认构建
+      - name: Copy .nojekyll file
+        run: |
+          if [ -f ".nojekyll" ]; then
+            cp .nojekyll unpackage/dist/build/web/
+          else
+            echo ".nojekyll file not found, creating it..."
+            touch unpackage/dist/build/web/.nojekyll
+          fi
+
+      # 步骤3：部署到 gh-pages 分支
       # 注意：此方案要求你每次在本地用 HBuilderX 编译后，将编译产物提交到源码仓库
       # 你需要修改 .gitignore 文件，移除对 unpackage/dist/build/web 的忽略
       - name: Deploy to GitHub Pages
