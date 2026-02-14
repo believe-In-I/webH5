@@ -4,8 +4,16 @@ package-lock.json
 yarn.lock
 
 # 编译输出目录 (保留web构建产物用于部署)
-unpackage/dist/build/
-!unpackage/dist/build/web/
+unpackage/dist/build/mp-alipay/
+unpackage/dist/build/mp-baidu/
+unpackage/dist/build/mp-weixin/
+unpackage/dist/build/mp-toutiao/
+unpackage/dist/build/mp-qq/
+unpackage/dist/build/mp-kuaishou/
+unpackage/dist/build/mp-lark/
+unpackage/dist/build/quickapp-webview/
+unpackage/dist/build/quickapp-webview-huawei/
+unpackage/dist/build/quickapp-webview-union/
 
 # 编辑器文件
 .hbuilderx/
