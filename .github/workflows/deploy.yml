@@ -1,0 +1,50 @@
+name: Uni-App H5 自动部署
+
+# 当推送到 main 分支时触发这个工作流
+on:
+  push:
+    branches: [ "main" ]
+
+# 赋予工作流读写仓库内容的权限，这样才能推送代码
+permissions:
+  contents: write
+
+jobs:
+  build-and-deploy:
+    # 在最新的 Ubuntu 系统上运行
+    runs-on: ubuntu-latest
+
+    steps:
+      # 步骤1：把你的代码下载到云端的机器上
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 步骤2：设置 Node.js 环境，因为 uni-app 的编译依赖它
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      # 步骤3：安装项目依赖 (如果有 package.json 的话)
+      # HBuilderX 项目可能没有 package.json，但有些依赖可能需要，这条命令很安全，即使没有也不会报错
+      - name: Install dependencies
+        run: npm install
+
+      # 步骤4：编译项目 (这是最核心的步骤)
+      # 这里需要想办法让 Ubuntu 能编译 HBuilderX 项目。由于没有官方 cli，一种变通方法是：
+      # 假设你的本地项目里，已经将 HBuilderX 编译好的 H5 文件 (位于 unpackage/dist/build/web) 提交到了源码仓库。
+      # 这样我们就不需要在服务器上编译了，直接部署这些预编译好的文件。
+      # 注意：此方案要求你每次在本地用 HBuilderX 编译后，将 unpackage 目录下的改动也 commit 并 push 到 main 分支。
+      - name: Build project (Optional - if you commit built files)
+        run: |
+          echo "如果项目源码和编译后的文件都在仓库里，这一步可以跳过或用来运行其他脚本。"
+          # 例如，如果你的项目其实是有 npm 脚本的，可以取消下面这行的注释来运行它
+          # npm run build:h5
+
+      # 步骤5：部署到 gh-pages 分支
+      - name: Deploy to GitHub Pages
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          folder: unpackage/dist/build/web   # 指定你的编译输出文件夹
+          branch: gh-pages                    # 推送到 gh-pages 分支
+          clean: true                          # 部署前先清理 gh-pages 分支的旧文件

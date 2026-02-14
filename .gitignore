@@ -1,0 +1,20 @@
+# 依赖包
+node_modules/
+package-lock.json
+yarn.lock
+
+# 编译输出目录
+unpackage/dist/
+
+# 编辑器文件
+.hbuilderx/
+.idea/
+.vscode/
+
+# 系统文件
+.DS_Store
+Thumbs.db
+
+# 本地环境
+.env.local
+.env.*.local
