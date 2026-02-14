@@ -1,65 +1,68 @@
-name: Uni-App H5 自动部署
+name: Uni-App H5 全自动编译部署
 
-# 当推送到 main 分支时触发这个工作流
+# 当推送到 main 分支时触发
 on:
   push:
     branches: [ "main" ]
 
-# 赋予工作流读写仓库内容的权限，这样才能推送代码
+# 赋予工作流读写权限
 permissions:
   contents: write
 
 jobs:
   build-and-deploy:
-    # 在最新的 Ubuntu 系统上运行
     runs-on: ubuntu-latest
-
+    
     steps:
-      # 步骤1：把你的代码下载到云端的机器上
+      # 步骤1：下载你的源码
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # 步骤2：设置 Node.js 环境
+      # 步骤2：设置 Node.js 环境（编译需要）
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '18'
 
-      # 步骤3：安装依赖
+      # 步骤3：安装依赖（如果没有 package.json，这一步会自动跳过）
       - name: Install dependencies
-        run: npm install
-
-      # 步骤4：安装 HBuilderX 命令行工具
-      - name: Install HBuilderX CLI
         run: |
-          wget -q https://download.dcloud.net.cn/HBuilderX.4.0.3.20240408.zip -O HBuilderX.zip
-          unzip -q HBuilderX.zip -d HBuilderX
-          chmod +x HBuilderX/HBuilderX
-          echo "HBuilderX installed successfully"
+          if [ -f package.json ]; then
+            npm install
+          fi
 
-      # 步骤5：编译 Uni-App 项目为 H5
+      # 步骤4：🔴 关键！安装 HBuilderX 命令行工具
+      - name: Install HBuilderX CLI
+        run: npm install -g @dcloudio/uni-cli
+
+      # 步骤5：🔴 关键！在云端自动编译
       - name: Build H5 project
         run: |
-          # 使用 HBuilderX 命令行工具编译项目
-          # 注意：这需要项目中有正确的 manifest.json 配置
-          ./HBuilderX/HBuilderX --headless --compile --project . --platform web
-          echo "Project built successfully"
+          echo "开始编译 H5 项目..."
+          npx uni-app build --platform h5
+          echo "编译完成，检查输出目录..."
+          ls -la dist/build/h5 || ls -la unpackage/dist/build/web
 
-      # 步骤6：复制 .nojekyll 文件到编译输出目录
-      # 这样 .nojekyll 文件就会被部署到 gh-pages 分支，禁用 GitHub Pages 的默认构建
-      - name: Copy .nojekyll file
+      # 步骤6：创建 .nojekyll 文件（告诉 GitHub 不要处理 Jekyll）
+      - name: Create .nojekyll
         run: |
-          if [ -f ".nojekyll" ]; then
-            cp .nojekyll unpackage/dist/build/web/
-          else
-            echo ".nojekyll file not found, creating it..."
+          # 先确认编译输出目录
+          if [ -d "dist/build/h5" ]; then
+            touch dist/build/h5/.nojekyll
+            DEPLOY_FOLDER="dist/build/h5"
+          elif [ -d "unpackage/dist/build/web" ]; then
             touch unpackage/dist/build/web/.nojekyll
+            DEPLOY_FOLDER="unpackage/dist/build/web"
+          else
+            echo "无法找到编译输出目录！"
+            exit 1
           fi
+          echo "DEPLOY_FOLDER=$DEPLOY_FOLDER" >> $GITHUB_ENV
 
       # 步骤7：部署到 gh-pages 分支
       - name: Deploy to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@v4
         with:
-          folder: unpackage/dist/build/web   # 指定你的编译输出文件夹
-          branch: gh-pages                    # 推送到 gh-pages 分支
-          clean: true                          # 部署前先清理 gh-pages 分支的旧文件
+          folder: ${{ env.DEPLOY_FOLDER }}  # 使用上一步确定的目录
+          branch: gh-pages
+          clean: true
